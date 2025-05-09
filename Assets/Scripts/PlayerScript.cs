@@ -14,9 +14,12 @@ public class PlayerScript : MonoBehaviour
 
     [SerializeField] private float interactionRange = 5;
     
+    private Interactable _closestInteractable = null;
+    
     // Start is called before the first frame update
     void Start()
     {
+        _inventory = new List<PickableObject>();
         _rb = GetComponent<Rigidbody2D>();
         if(_rb == null)
             Debug.LogError("Player is missing rigidbody");
@@ -26,12 +29,13 @@ public class PlayerScript : MonoBehaviour
     void FixedUpdate()
     {
         _rb.velocity = _moveInput * movementSpeed;
+        FindInteractables();
     }
 
-    private void Interact(InputAction.CallbackContext context)
+    private void FindInteractables()
     {
         float closestDistance = interactionRange + 100;
-        Interactable closestInteractable;
+        _closestInteractable = null;
         
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, interactionRange);
         foreach (Collider2D col in colliders)
@@ -40,10 +44,23 @@ public class PlayerScript : MonoBehaviour
             Interactable interactable = col.GetComponent<Interactable>();
             if (interactable != null && (transform.position - interactable.gameObject.transform.position).magnitude < closestDistance)
             {
-                closestInteractable = interactable;
+                _closestInteractable = interactable;
                 closestDistance = (transform.position - interactable.gameObject.transform.position).magnitude;
             }
         }
+
+        if (closestDistance <= interactionRange && _closestInteractable != null)
+        {
+            // Highlight the interactable
+            //_closestInteractable.GetComponent<SpriteRenderer>().color = Color.red;
+        }
+    }
+    
+    public void Interact(InputAction.CallbackContext context)
+    {
+        //Debug.Log("Interact");
+        if(_closestInteractable != null)
+            _closestInteractable.Interact();
     }
 
     public void Move(InputAction.CallbackContext context)

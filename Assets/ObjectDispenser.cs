@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Serialization;
+using Slider = UnityEngine.UI.Slider;
 
 public class ObjectDispenser : MonoBehaviour
 {
@@ -7,10 +8,12 @@ public class ObjectDispenser : MonoBehaviour
     [FormerlySerializedAs("objectResuplyDelay")] [SerializeField] private float resuplyDelay = 5;
     [SerializeField] private bool autoResuply;
     [SerializeField] private bool startSupplied = false;
+    [SerializeField] private Slider slider;
     private float _resuplyTime;
     private bool _resuplying = false;
     private bool _supplied;
     private PickableObject _objInstance;
+
     
     // Start is called before the first frame update
     void Start()
@@ -27,14 +30,33 @@ public class ObjectDispenser : MonoBehaviour
         if (_resuplyTime == 0 && _resuplying)
         {
             EndResupply();
-        } else if (autoResuply && _resuplying == false && _resuplyTime == 0)
+        } else if (autoResuply && _supplied == false && _resuplying == false && _resuplyTime == 0)
         {
             StartResupply();
         }
+        
+        _resuplyTime -= Time.deltaTime;
+        if (_resuplyTime < 0)
+            _resuplyTime = 0;
+        UpdateSlider();
     }
 
+    void UpdateSlider()
+    {
+        if (_resuplying)
+        {
+            slider.gameObject.SetActive(true);
+        }
+        else
+        {
+            slider.gameObject.SetActive(false);
+        }
+        slider.value = _resuplyTime / resuplyDelay;
+    }
+    
     public void StartResupply()
     {
+        Debug.Log("Start Resuply");
         _resuplyTime = resuplyDelay;
         _resuplying = true;
     }
@@ -47,8 +69,9 @@ public class ObjectDispenser : MonoBehaviour
         _resuplying = false;
     }
 
-    void OnInterract(PlayerScript player)
+    public void OnInteract(PlayerScript player)
     {
+        Debug.Log("Interact with dispenser. resuplyDelay: " + _resuplyTime + " resuplying: " + _resuplying);
         if (_supplied)
         {
             // Player picks up the object
