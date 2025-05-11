@@ -4,5 +4,5 @@ using UnityEngine.UI;
 
 public class PickableObject : MonoBehaviour
 {
-    public String name = "Object";
+    public String objName = "Object";
 }

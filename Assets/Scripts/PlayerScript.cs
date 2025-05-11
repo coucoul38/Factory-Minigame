@@ -3,21 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 public class PlayerScript : MonoBehaviour
 {
     [SerializeField] private float movementSpeed = 5;
     private Rigidbody2D _rb;
+    private PlayerInputActions _inputActions;
     private Vector2 _moveInput;
 
-    [SerializeField] private int inventorySize;
+    /////** INVENTORY **/////
     private List<PickableObject> _inventory;
+    [SerializeField] private Transform hand1Transform; 
+    [SerializeField] private Transform hand2Transform;
 
-    [SerializeField] private float interactionRange = 5;
     
+    [SerializeField] private float interactionRange = 5;
     private Interactable _closestInteractable = null;
-
-    private PlayerInputActions _inputActions;
+    
     
     // Start is called before the first frame update
     void Start()
@@ -97,11 +100,42 @@ public class PlayerScript : MonoBehaviour
     // add object to inventory
     public void PickupObject(PickableObject obj)
     {
+        PickableObject objInstance;
+        
         // If inventory full, override first object
-        if (_inventory.Count > inventorySize)
+        if (_inventory.Count == 2)
         {
+            // Unparent object so childcount updates
+            _inventory[0].gameObject.transform.SetParent(null);
+            
+            Destroy(_inventory[0].gameObject);
             _inventory.RemoveAt(0);
         }
-        _inventory.Add(obj);
+        
+        if (hand1Transform.childCount == 0)
+        {
+            objInstance = Instantiate(obj, hand1Transform);
+        } else
+        {
+            objInstance = Instantiate(obj, hand2Transform);
+        }
+        
+        objInstance.transform.localPosition = Vector2.zero;
+        _inventory.Add(objInstance);
+    }
+
+    public bool TakeIngredient(string ingredientName)
+    {
+        foreach (PickableObject ingredient in _inventory)
+        {
+            if (ingredient.objName == ingredientName)
+            {
+                _inventory[_inventory.IndexOf(ingredient)].gameObject.transform.SetParent(null);
+                Destroy(_inventory[_inventory.IndexOf(ingredient)].gameObject);
+                _inventory.Remove(ingredient);
+                return true;
+            }
+        }
+        return false;
     }
 }

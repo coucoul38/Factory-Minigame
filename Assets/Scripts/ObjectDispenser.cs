@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Slider = UnityEngine.UI.Slider;
@@ -5,14 +6,17 @@ using Slider = UnityEngine.UI.Slider;
 public class ObjectDispenser : MonoBehaviour
 {
     [SerializeField] private PickableObject pickableObject;
-    [FormerlySerializedAs("objectResuplyDelay")] [SerializeField] private float resuplyDelay = 5;
+    [SerializeField] private float resuplyDelay = 5;
     [SerializeField] private bool autoResuply;
     [SerializeField] private bool startSupplied = false;
+
+    [SerializeField] private List<string> ingredientsRequired;
+    private List<string> _inventory;
+    
     [SerializeField] private Slider slider;
     private float _resuplyTime;
     private bool _resuplying = false;
     private bool _supplied;
-    private PickableObject _objInstance;
     private SpriteRenderer _sprite;
     
     // Start is called before the first frame update
@@ -23,10 +27,8 @@ public class ObjectDispenser : MonoBehaviour
         {
             EndResupply();
         }
-        else
-        {
-            _sprite.color = Color.red;
-        }
+
+        _inventory = new List<string>();
     }
 
     // Update is called once per frame
@@ -61,7 +63,6 @@ public class ObjectDispenser : MonoBehaviour
     
     public void StartResupply()
     {
-        Debug.Log("Start Resuply");
         _resuplyTime = resuplyDelay;
         _resuplying = true;
         _sprite.color = Color.yellow;
@@ -71,22 +72,46 @@ public class ObjectDispenser : MonoBehaviour
     {
         _supplied = true;
         _sprite.color = Color.green;
-        // show object
-        _objInstance = Instantiate(pickableObject);
         _resuplying = false;
     }
 
-    public void OnInteract(PlayerScript player)
+    public void OnInteract()
     {
-        Debug.Log("Interact with dispenser. resuplyDelay: " + _resuplyTime + " resuplying: " + _resuplying);
+        PlayerScript player = GameManager.Instance.GetPlayer();
+        
         if (_supplied)
         {
             // Player picks up the object
-            player.PickupObject(_objInstance);
+            player.PickupObject(pickableObject);
             _supplied = false;
             _sprite.color = Color.red;
         } else if (_resuplyTime == 0 && _resuplying == false)
         {
+            if (ingredientsRequired != null && ingredientsRequired.Count != 0)
+            {
+                // Check for ingredients
+                int count = 0;
+                foreach (string ingredient in ingredientsRequired)
+                {
+                    if (_inventory.Contains(ingredient) == false)
+                    {
+                        // try to take ingredients from the player
+                        if (player.TakeIngredient(ingredient))
+                            count++;
+                    }
+                    else
+                    {
+                        count++;
+                    }
+                }
+
+                if (count != ingredientsRequired.Count)
+                {
+                    Debug.Log(ingredientsRequired.Count + " ingredients required, only " + count + " in");
+                    return;
+                }
+            }
+            
             StartResupply();
         }
     }
