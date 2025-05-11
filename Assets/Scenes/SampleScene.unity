@@ -250,8 +250,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pickableObject: {fileID: 551246284828044439, guid: 2aba081fa77c91b45ba31e7a7f052f34, type: 3}
   resuplyDelay: 5
-  autoResuply: 1
-  startSupplied: 1
+  autoResuply: 0
+  startSupplied: 0
   slider: {fileID: 2026642642}
 --- !u!61 &121417019
 BoxCollider2D:
@@ -956,6 +956,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3349975750621171696, guid: 870eb99372beb48408f19d812397a12f, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3349975750621171696, guid: 870eb99372beb48408f19d812397a12f, type: 3}
       propertyPath: m_ActionEvents.Array.data[1].m_PersistentCalls.m_Calls.Array.size
       value: 1

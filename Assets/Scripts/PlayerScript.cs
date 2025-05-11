@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,8 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] private float interactionRange = 5;
     
     private Interactable _closestInteractable = null;
+
+    private PlayerInputActions _inputActions;
     
     // Start is called before the first frame update
     void Start()
@@ -23,6 +26,24 @@ public class PlayerScript : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         if(_rb == null)
             Debug.LogError("Player is missing rigidbody");
+    }
+
+    private void OnEnable()
+    {
+        _inputActions = new PlayerInputActions();
+        _inputActions.Gameplay.Enable();
+        _inputActions.Gameplay.Interaction.started += Interact;
+        _inputActions.Gameplay.Movement.performed += Move;
+        _inputActions.Gameplay.Movement.canceled += StopMovement;
+    }
+
+    private void OnDisable()
+    {
+        _inputActions.Gameplay.Disable();
+        _inputActions.Gameplay.Interaction.started -= Interact;
+        _inputActions.Gameplay.Movement.performed -= Move;
+        _inputActions.Gameplay.Movement.canceled -= StopMovement;
+        _inputActions = null;
     }
 
     // Update is called once per frame
@@ -66,6 +87,11 @@ public class PlayerScript : MonoBehaviour
     public void Move(InputAction.CallbackContext context)
     {
         _moveInput = context.ReadValue<Vector2>().normalized;
+    }
+
+    private void StopMovement(InputAction.CallbackContext context)
+    {
+        _moveInput = Vector2.zero;
     }
 
     // add object to inventory

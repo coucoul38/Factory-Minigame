@@ -13,14 +13,19 @@ public class ObjectDispenser : MonoBehaviour
     private bool _resuplying = false;
     private bool _supplied;
     private PickableObject _objInstance;
-
+    private SpriteRenderer _sprite;
     
     // Start is called before the first frame update
     void Start()
     {
+        _sprite = GetComponent<SpriteRenderer>();
         if (startSupplied)
         {
             EndResupply();
+        }
+        else
+        {
+            _sprite.color = Color.red;
         }
     }
 
@@ -59,11 +64,13 @@ public class ObjectDispenser : MonoBehaviour
         Debug.Log("Start Resuply");
         _resuplyTime = resuplyDelay;
         _resuplying = true;
+        _sprite.color = Color.yellow;
     }
     
     public void EndResupply()
     {
         _supplied = true;
+        _sprite.color = Color.green;
         // show object
         _objInstance = Instantiate(pickableObject);
         _resuplying = false;
@@ -77,6 +84,7 @@ public class ObjectDispenser : MonoBehaviour
             // Player picks up the object
             player.PickupObject(_objInstance);
             _supplied = false;
+            _sprite.color = Color.red;
         } else if (_resuplyTime == 0 && _resuplying == false)
         {
             StartResupply();
