@@ -9,7 +9,7 @@ public class ObjectDispenser : MonoBehaviour
     [SerializeField] private float resuplyDelay = 5;
     [SerializeField] private bool autoResuply;
     [SerializeField] private bool startSupplied = false;
-
+    
     [SerializeField] private List<string> ingredientsRequired;
     private List<string> _inventory;
     
@@ -17,6 +17,7 @@ public class ObjectDispenser : MonoBehaviour
     private float _resuplyTime;
     private bool _resuplying = false;
     private bool _supplied;
+    [SerializeField] private bool changeColor = true;
     private SpriteRenderer _sprite;
     
     // Start is called before the first frame update
@@ -65,13 +66,24 @@ public class ObjectDispenser : MonoBehaviour
     {
         _resuplyTime = resuplyDelay;
         _resuplying = true;
-        _sprite.color = Color.yellow;
+        if(changeColor)
+            _sprite.color = Color.yellow;
+        
+        // Use ingredients
+        if (ingredientsRequired != null && ingredientsRequired.Count != 0)
+        {
+            foreach (string ingredient in ingredientsRequired)
+            {
+                _inventory.Remove(ingredient);
+            }
+        }
     }
     
     public void EndResupply()
     {
         _supplied = true;
-        _sprite.color = Color.green;
+        if(changeColor)
+            _sprite.color = Color.green;
         _resuplying = false;
     }
 
@@ -84,8 +96,10 @@ public class ObjectDispenser : MonoBehaviour
             // Player picks up the object
             player.PickupObject(pickableObject);
             _supplied = false;
-            _sprite.color = Color.red;
-        } else if (_resuplyTime == 0 && _resuplying == false)
+            if(changeColor)
+                _sprite.color = Color.red;
+        } 
+        else if (_resuplyTime == 0 && _resuplying == false)
         {
             if (ingredientsRequired != null && ingredientsRequired.Count != 0)
             {
@@ -97,7 +111,10 @@ public class ObjectDispenser : MonoBehaviour
                     {
                         // try to take ingredients from the player
                         if (player.TakeIngredient(ingredient))
+                        {
+                            _inventory.Add(ingredient);
                             count++;
+                        }
                     }
                     else
                     {
